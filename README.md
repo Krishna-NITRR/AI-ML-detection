@@ -1,84 +1,78 @@
 # KHAAN NETRA
 
-**Smart PPE Compliance Monitoring & Reporting System for Underground Coal Mine Entry Points**
+PPE compliance monitoring for underground coal mine entry points. Camera at the gate, YOLOv8 in the browser, score on screen.
 
-Built by **Wisdom Riders** — Phase 1: Computer Vision + Dashboard
+Built by **Wisdom Riders** — this is Phase 1 (CV + Dashboard).
 
 ---
 
-## What This Is
+## What it does
 
-KHAAN NETRA uses computer vision at mine entry gates to detect whether workers are wearing required PPE (helmet, vest, boots, self-rescuer, gas detector) before entering underground operations. It generates a compliance score, logs all scans to a local database, and provides a real-time monitoring dashboard for mine safety officers.
+Workers walk up to a mine entry gate. A webcam feed runs through a YOLOv8 model (exported to TensorFlow.js) that checks for helmet, vest, boots, self-rescuer, and gas detector. Each item has a point value. Score too low? Entry denied, supervisor gets an alert.
 
-### Current Status: Phase 1 (CV + Dashboard)
+Everything runs client-side. No server needed. Data lives in IndexedDB. Works offline after the first load.
 
-- **Real inference** using a custom-trained YOLOv8 model (TensorFlow.js) for PPE item classification
-- **Offline-first PWA** — works without network after first load
-- **IndexedDB** storage — all data stays on-device
-- **RFID-ready architecture** — pluggable identification module, schema includes RFID fields
+### What's here
 
-### What's NOT Included Yet (Phase 2)
+- YOLOv8 inference running in-browser via TensorFlow.js
+- Offline-first PWA (service worker caches the app shell + model weights)
+- IndexedDB for all data — workers, scan logs, alerts
+- RFID-ready identification module (schema and interface are in place, just needs hardware)
 
-- RFID handheld scanner hardware integration
+### What's not here yet (Phase 2)
+
+- RFID handheld scanner integration
 - PPE logging station (UID tag assignment)
-- Server-side data sync
+- Server-side sync
 
 ---
 
-## Quick Start
+## Getting started
 
-1. Serve the `khaan-netra/` directory with any static HTTP server:
-   ```bash
-   # Python
-   cd khaan-netra && python -m http.server 8080
+Serve the directory. Any static server works:
 
-   # Node.js
-   npx serve khaan-netra
+```bash
+# Python
+cd khaan-netra && python -m http.server 8080
 
-   # Or open index.html directly (service worker requires HTTP, not file://)
-   ```
-2. Open `http://localhost:8080` in Chrome/Edge
-3. Grant camera permission when prompted
-4. The YOLOv8 model downloads on first load, then is cached offline
+# Node
+npx serve khaan-netra
+```
+
+Open `http://localhost:8080` in Chrome or Edge. Allow camera access when it asks. The YOLOv8 model loads on first visit and gets cached by the service worker after that.
+
+> **Note:** `file://` won't work — the service worker needs HTTP.
 
 ---
 
-## Computer Vision Approach
+## How the CV works
 
-### Current Implementation
+We trained a YOLOv8n model on a construction PPE dataset using `ultralytics`, then exported it to TFJS format. The model sits in `models/ppe-detector/` and `cv-scanner.js` loads it with `tf.loadGraphModel()`.
 
-The system uses a custom-trained **YOLOv8** model exported to TensorFlow.js to detect PPE items directly in the browser. This is **real inference** running entirely on the edge.
+Detection classes include Helmet, Vest, Person, and the "missing" variants (NO-Hardhat, NO-Safety Vest). The model runs at whatever frame rate TF.js can manage on the client hardware — usually 10-20 FPS on a decent laptop.
 
-The model is trained to detect classes such as:
-- **Helmet** (Hardhat)
-- **Vest** (Safety Vest)
-- **Person**
-- Missing PPE classes (NO-Hardhat, NO-Safety Vest)
-
-### How it was trained
-
-The model was trained using the `ultralytics` package on a PPE detection dataset:
+### Training (if you want to retrain)
 
 ```bash
 pip install ultralytics
 
-# Train on Construction-PPE dataset (auto-downloads, ~178MB, 1416 images)
+# Construction-PPE dataset, auto-downloads (~178MB, 1416 images)
 yolo detect train data=construction-ppe.yaml model=yolov8n.pt epochs=25 imgsz=640
 
-# Export to TensorFlow.js format
+# Export to TF.js
 yolo export model=runs/detect/train/weights/best.pt format=tfjs
 ```
 
-The exported model files are placed in `models/ppe-detector/` and loaded by `cv-scanner.js` via `tf.loadGraphModel()`.
+Drop the exported files into `models/ppe-detector/` and you're set.
 
-Alternative datasets for future improvements:
+Other datasets worth trying:
 - `snehilsanyal/Construction-Site-Safety-PPE-Detection` (Kaggle, 2801 images)
 - `ciber-lab/pictor-ppe` (YOLOv3, worker+hat+vest)
 - `ahmadmughees/SH17dataset` (8099 images, 17 classes)
 
 ---
 
-## Scoring Formula
+## Scoring
 
 | PPE Item | Points | Essential |
 |----------|--------|-----------|
@@ -89,47 +83,47 @@ Alternative datasets for future improvements:
 | Gas Detector | 10 | No |
 | **Total** | **100** | |
 
-- **Score < 30%** → ENTRY DENIED (red state, instant alert, supervisor notified)
-- **Score ≥ 30%** → ENTRY ALLOWED (logged normally)
-- Borderline scores (30–49%) trigger warning alerts
+- Below 30% → **ENTRY DENIED** (red state, instant alert, supervisor notified)
+- 30% and above → entry allowed, logged normally
+- 30–49% gets a warning alert (borderline)
 
 ---
 
-## Architecture
+## Project structure
 
 ```
 khaan-netra/
-├── index.html              # SPA with all views
+├── index.html              # Single-page app, all views
 ├── manifest.json           # PWA manifest
 ├── service-worker.js       # Offline cache (app shell + model weights)
 ├── css/
-│   ├── index.css           # Design tokens, reset, layout primitives
-│   ├── dashboard.css       # Dashboard grid, stat cards, chart
-│   └── cv-scanner.css      # Scanner station, camera feed, PPE checklist
+│   ├── index.css           # Design tokens, reset, layout
+│   ├── dashboard.css       # Dashboard grid, stat cards, charts
+│   └── cv-scanner.css      # Scanner UI, camera feed, PPE checklist
 ├── js/
-│   ├── app.js              # SPA router, view lifecycle, clock
-│   ├── cv-scanner.js       # Webcam, COCO-SSD inference, PPE heuristics
-│   ├── dashboard.js        # Stats, Chart.js trend, tables, leaderboard
+│   ├── app.js              # SPA router, view switching, clock
+│   ├── cv-scanner.js       # Webcam + YOLOv8 inference + NMS post-processing
+│   ├── dashboard.js        # Stats, Chart.js trend line, tables, leaderboard
 │   ├── data-store.js       # IndexedDB wrapper (workers, scanLogs, alerts)
-│   ├── compliance.js       # Scoring engine (formula + alert generation)
-│   ├── identification.js   # Pluggable ID source (ManualEntry + RFID-ready)
+│   ├── compliance.js       # Scoring formula + alert generation
+│   ├── identification.js   # Worker ID source (manual entry now, RFID later)
 │   └── alerts.js           # Toast notifications, audio cues, alert logging
-├── lib/                    # Vendored libraries (offline-safe)
+├── lib/                    # Vendored (no CDN dependency)
 │   ├── tf.min.js           # TensorFlow.js 4.22.0
 │   └── chart.umd.min.js   # Chart.js 4.4.7
 └── models/
-    └── ppe-detector/       # Trained TFJS YOLOv8 model weights
+    └── ppe-detector/       # YOLOv8 TFJS model weights
 ```
 
 ---
 
-## Phase 2 Integration Guide — RFID
+## RFID integration (Phase 2 notes)
 
-The codebase is designed for zero-rearchitecture RFID integration.
+The code's already set up for this. Here's how it works:
 
-### Pluggable Identification Interface
+### The identification interface
 
-`identification.js` exports a single contract:
+`identification.js` has one contract:
 
 ```js
 IdentificationSource.getWorker() → Promise<{
@@ -139,63 +133,60 @@ IdentificationSource.getWorker() → Promise<{
 }>
 ```
 
-`cv-scanner.js` calls **only this interface** — it never references the input form directly.
+`cv-scanner.js` only calls this interface. It doesn't touch the input form directly.
 
-### Adding an `RFIDSource`
+### Hooking up a reader
 
-1. Create a new class implementing `getWorker()` in `identification.js`
-2. For **USB-HID readers** (most common): The manual entry field already includes a `BurstDetector` that detects fast character bursts (<50ms between keystrokes) — this is how HID keyboard-wedge RFID readers work. When real hardware is plugged in, it'll "type" the tag UID into the focused input and press Enter. The burst detector catches this and auto-submits. **Zero code changes needed** for many readers.
-3. For **serial/Bluetooth readers**: Use `navigator.serial` or `navigator.bluetooth` Web APIs to connect, read the UID, and resolve the Promise with `{workerId, name, source: 'rfid'}`.
-4. Update `IdentificationSource.createSource()` to select the active source based on connected hardware.
+**USB-HID readers** (keyboard-wedge type): There's already a `BurstDetector` in the manual entry field that watches for fast keystroke bursts (<50ms apart). Most HID readers just "type" the UID and hit Enter. The burst detector catches that and auto-submits. Plug in the reader and it should just work — no code changes.
 
-### Schema Readiness
+**Serial/Bluetooth readers**: Use `navigator.serial` or `navigator.bluetooth` to read the UID, then resolve the Promise with `{workerId, name, source: 'rfid'}`. Add a new class in `identification.js` and update `createSource()` to pick it.
 
-The IndexedDB schema already includes:
-- `workers.rfidTag` (nullable) — set when RFID tag is assigned to a worker
-- `scanLogs.identificationMethod` — records `"manual"` or `"rfid"` per scan
-- No schema migration needed when RFID goes live
+### Schema
 
-### RFID PPE Tag Scanning (Separate from Worker ID)
+IndexedDB already has the fields:
+- `workers.rfidTag` (nullable)
+- `scanLogs.identificationMethod` (`"manual"` or `"rfid"`)
 
-The PDF describes a separate RFID flow for scanning PPE items (each PPE has an RFID tag). This would be a new module (`js/rfid-scanner.js`) that:
-1. Prompts the operator to scan each PPE item
-2. Sends scanned UIDs to the server for verification
-3. Integrates with the compliance scoring as an additional data source alongside CV
+No migration needed when RFID goes live.
+
+### PPE tag scanning
+
+Separate from worker ID — each PPE item could have its own RFID tag. This'd be a new module (`js/rfid-scanner.js`) that scans each item, verifies UIDs server-side, and feeds results into the compliance scoring alongside the CV detections.
 
 ---
 
-## Data Export
+## Data export
 
-The dashboard includes CSV and JSON export buttons. Exported data includes:
+Dashboard has CSV and JSON export buttons. Covers:
 - Worker registry (ID, name, RFID tag)
-- All scan logs (worker, timestamp, detection details, score, verdict)
-- All alerts (timestamp, type, worker, message)
+- Scan logs (worker, timestamp, detections, score, verdict)
+- Alerts (timestamp, type, worker, message)
 
 ---
 
-## Offline Verification
+## Testing offline
 
-1. Open the app in Chrome, allow it to fully load (model downloads)
-2. Open DevTools → Application → Service Workers → confirm registered
-3. Go to Network tab → check "Offline"
-4. Reload the page — everything should work: dashboard, scanner, inference
-5. Or: disable WiFi / enable airplane mode and test
+1. Load the app fully in Chrome (let the model download)
+2. DevTools → Application → Service Workers — check it's registered
+3. Network tab → tick "Offline"
+4. Reload. Dashboard, scanner, inference — all should work
+5. Or just turn off WiFi
 
 ---
 
-## Tech Stack
+## Tech stack
 
-| Component | Technology |
-|-----------|-----------|
-| Inference | TensorFlow.js + Custom YOLOv8 |
-| UI | Vanilla HTML/CSS/JS (no framework) |
-| Storage | IndexedDB (browser-native) |
+| What | How |
+|------|-----|
+| Inference | TensorFlow.js + YOLOv8 (custom trained) |
+| UI | Vanilla HTML/CSS/JS, no framework |
+| Storage | IndexedDB |
 | Charts | Chart.js 4.4.7 |
 | Offline | Service Worker + Cache API (PWA) |
-| Edge Compute | Runs entirely in-browser (no server) |
+| Runs where | Entirely in the browser, no backend |
 
 ---
 
 ## License
 
-Built for hackathon demonstration. See original Wisdom Riders KHAAN NETRA project documentation for full context.
+Hackathon project. See the Wisdom Riders KHAAN NETRA docs for full context.
