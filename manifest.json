@@ -1,0 +1,18 @@
+{
+  "name": "KHAAN NETRA - PPE Compliance Monitor",
+  "short_name": "KHAAN NETRA",
+  "description": "Smart PPE Compliance Monitoring & Reporting System for Underground Coal Mine Entry Points",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#060a13",
+  "theme_color": "#0b0f19",
+  "orientation": "any",
+  "categories": ["safety", "industrial", "monitoring"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230b0f19' width='100' height='100' rx='20'/><text y='.9em' font-size='80' x='10'>⛑</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

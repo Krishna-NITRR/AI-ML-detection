@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="KHAAN NETRA - Smart PPE Compliance Monitoring &amp; Reporting System for Underground Coal Mine Entry Points. Real-time computer vision PPE detection dashboard.">
+  <meta name="theme-color" content="#0b0f19">
+  <title>KHAAN NETRA - PPE Compliance Monitor</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛑</text></svg>">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/cv-scanner.css">
+</head>
+<body>
+
+<!-- ============================================================
+     APP SHELL
+     ============================================================ -->
+<div id="app-shell">
+
+  <!-- SIDEBAR -->
+  <nav class="app-sidebar" aria-label="Main navigation">
+    <!-- Brand mark -->
+    <div class="app-sidebar__brand-mark">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7v6c0 5.55 4.16 10.74 10 12 5.84-1.26 10-6.45 10-12V7L12 2z"/>
+        <path d="M9 12l2 2 4-4" stroke-width="2.5"/>
+      </svg>
+    </div>
+
+    <!-- Nav items -->
+    <button class="nav-item" data-nav="dashboard" title="Dashboard">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/>
+        <rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>
+      </svg>
+      <span class="nav-item__tooltip">Dashboard</span>
+    </button>
+
+    <button class="nav-item" data-nav="scanner" title="CV Scanner">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+        <circle cx="12" cy="13" r="4"/>
+      </svg>
+      <span class="nav-item__tooltip">CV Scanner</span>
+    </button>
+
+    <button class="nav-item" data-nav="workers" title="Workers">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+      </svg>
+      <span class="nav-item__tooltip">Workers</span>
+    </button>
+
+    <button class="nav-item" data-nav="alerts" title="Alerts">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 01-3.46 0"/>
+      </svg>
+      <span class="nav-item__tooltip">Alerts</span>
+      <span class="nav-item__badge" id="nav-alert-badge" style="display:none"></span>
+    </button>
+
+    <div class="sidebar-spacer"></div>
+
+    <!-- RFID Station - disabled Phase 2 -->
+    <button class="nav-item nav-item--disabled" title="RFID Station - Phase 2" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <path d="M12 12m-3 0a3 3 0 106 0 3 3 0 10-6 0"/>
+        <path d="M7 15V9"/><path d="M17 15V9"/>
+      </svg>
+      <span class="nav-item__tooltip">RFID Station - Coming in Phase 2</span>
+    </button>
+
+    <!-- Settings placeholder -->
+    <button class="nav-item nav-item--disabled" title="Settings" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+      <span class="nav-item__tooltip">Settings</span>
+    </button>
+  </nav>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="app-header__brand">
+      <div class="app-header__logo">KHAAN <span>NETRA</span></div>
+      <div class="app-header__divider"></div>
+      <div class="app-header__subtitle">Smart PPE Compliance Monitor</div>
+    </div>
+    <div class="app-header__status">
+      <div class="status-indicator">
+        <span class="status-indicator__label">Shift</span>
+        <span class="status-indicator__dot status-indicator__dot--amber"></span>
+        <span id="header-shift">SHIFT A</span>
+      </div>
+      <div class="status-indicator">
+        <span class="status-indicator__label">Time</span>
+        <span id="header-time">--:--:--</span>
+      </div>
+      <div class="status-indicator">
+        <span class="status-indicator__label">Model</span>
+        <span class="status-indicator__dot" id="model-status-dot"></span>
+        <span id="model-status-text">STANDBY</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="app-main">
+
+    <!-- ======== DASHBOARD VIEW ======== -->
+    <section class="view view--active" id="view-dashboard">
+      <div class="dash-grid">
+
+        <!-- Stat cards -->
+        <div class="stat-card stat-card--cyan dash-stat-1">
+          <div class="stat-card__label">Workers Scanned Today</div>
+          <div class="stat-card__value" id="stat-scanned">--</div>
+          <div class="stat-card__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--green dash-stat-2">
+          <div class="stat-card__label">Compliance Rate</div>
+          <div class="stat-card__value" id="stat-compliance">--%</div>
+          <div class="stat-card__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--red dash-stat-3">
+          <div class="stat-card__label">Alerts This Shift</div>
+          <div class="stat-card__value" id="stat-alerts">--</div>
+          <div class="stat-card__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--amber dash-stat-4">
+          <div class="stat-card__label">Avg Score Today</div>
+          <div class="stat-card__value" id="stat-avg-score">--%</div>
+          <div class="stat-card__icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Live feed panel -->
+        <div class="panel panel--sharp dash-feed">
+          <div class="panel__header">
+            <div class="panel__title">
+              <span class="panel__title-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+              Live Feed
+            </div>
+            <button class="btn btn--sm btn--primary" onclick="App.navigateTo('scanner')">Open Scanner</button>
+          </div>
+          <div class="panel__body panel__body--flush">
+            <div class="dash-feed-preview">
+              <div class="dash-feed-preview__overlay">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.3">
+                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                <div class="dash-feed-preview__overlay-text">Scanner inactive - open to begin</div>
+              </div>
+            </div>
+          </div>
+          <div class="dash-feed__actions">
+            <span class="dash-feed__last-scan" id="dash-last-scan">No scans yet</span>
+            <button class="btn btn--sm btn--outline" onclick="App.navigateTo('scanner')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              Start Scanning
+            </button>
+          </div>
+        </div>
+
+        <!-- Compliance chart -->
+        <div class="panel panel--sharp dash-chart">
+          <div class="panel__header">
+            <div class="panel__title">
+              <span class="panel__title-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </span>
+              Compliance Trend (24h)
+            </div>
+          </div>
+          <div class="panel__body panel__body--flush">
+            <div class="chart-container">
+              <canvas id="compliance-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent scans table -->
+        <div class="panel panel--sharp dash-scans">
+          <div class="panel__header">
+            <div class="panel__title">
+              <span class="panel__title-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              </span>
+              Recent Scans
+            </div>
+            <div style="display:flex;gap:var(--sp-2)">
+              <button class="btn btn--sm btn--outline" id="btn-export-csv" title="Export CSV">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                CSV
+              </button>
+              <button class="btn btn--sm btn--outline" id="btn-export-json" title="Export JSON">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                JSON
+              </button>
+            </div>
+          </div>
+          <div class="panel__body panel__body--flush">
+            <div class="scans-table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Time</th>
+                    <th>PPE</th>
+                    <th>Score</th>
+                    <th>Status</th>
+                    <th>Method</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-scans-body">
+                  <tr><td colspan="7" class="text-dim" style="text-align:center;padding:var(--sp-6)">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alert feed -->
+        <div class="panel panel--sharp dash-alerts">
+          <div class="panel__header">
+            <div class="panel__title">
+              <span class="panel__title-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+              </span>
+              Alert Feed
+            </div>
+            <button class="btn btn--sm btn--outline" onclick="App.navigateTo('alerts')">View All</button>
+          </div>
+          <div class="panel__body panel__body--flush">
+            <div class="alert-feed" id="alert-feed">
+              <div class="empty-state"><div class="empty-state__text">Loading...</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="panel panel--sharp dash-leader">
+          <div class="panel__header">
+            <div class="panel__title">
+              <span class="panel__title-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </span>
+              Compliance Leaders
+            </div>
+          </div>
+          <div class="panel__body panel__body--flush">
+            <div class="leaderboard-list" id="leaderboard">
+              <div class="empty-state"><div class="empty-state__text">Loading...</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======== CV SCANNER VIEW ======== -->
+    <section class="view" id="view-scanner">
+      <div class="scanner-layout">
+
+        <!-- Worker ID form -->
+        <div class="panel panel--sharp scanner-id-form">
+          <div class="panel__header">
+            <div class="panel__title">
+              <span class="panel__title-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4-4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              Worker Identification
+            </div>
+            <span class="badge badge--cyan" style="font-size:var(--text-2xs)">CUSTOM · YOLOv8</span>
+          </div>
+          <div class="panel__body" id="scanner-id-form">
+            <!-- ManualEntrySource mounts here -->
+          </div>
+        </div>
+
+        <!-- PPE detection status -->
+        <div class="panel panel--sharp scanner-status">
+          <div class="panel__header">
+            <div class="panel__title">
+              <span class="panel__title-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </span>
+              PPE Detection
+            </div>
+          </div>
+          <div class="panel__body" id="scanner-status-content">
+            <div class="ppe-checklist">
+              <!-- Helmet -->
+              <div class="ppe-check-item ppe-check-item--pending" id="ppe-status-helmet">
+                <div class="ppe-check-item__icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M2 18h20v2H2z"/><path d="M4 18v-4a8 8 0 0116 0v4"/><path d="M7 14h10"/>
+                  </svg>
+                </div>
+                <div class="ppe-check-item__name">Helmet</div>
+                <div class="ppe-check-item__points">30 pts</div>
+                <div class="ppe-check-item__confidence">--</div>
+                <div class="ppe-check-item__status-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dim"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+              </div>
+              <!-- Vest -->
+              <div class="ppe-check-item ppe-check-item--pending" id="ppe-status-vest">
+                <div class="ppe-check-item__icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M16 3l5 5v10l-5 3H8L3 18V8l5-5h8z"/><line x1="8" y1="8" x2="8" y2="18"/><line x1="16" y1="8" x2="16" y2="18"/>
+                  </svg>
+                </div>
+                <div class="ppe-check-item__name">Safety Vest</div>
+                <div class="ppe-check-item__points">25 pts</div>
+                <div class="ppe-check-item__confidence">--</div>
+                <div class="ppe-check-item__status-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dim"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+              </div>
+              <!-- Boots -->
+              <div class="ppe-check-item ppe-check-item--pending" id="ppe-status-boots">
+                <div class="ppe-check-item__icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M5 22h14v-2H5z"/><path d="M7 20v-8l-2-4V4h14v4l-2 4v8"/>
+                  </svg>
+                </div>
+                <div class="ppe-check-item__name">Safety Boots</div>
+                <div class="ppe-check-item__points">25 pts</div>
+                <div class="ppe-check-item__confidence">--</div>
+                <div class="ppe-check-item__status-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dim"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+              </div>
+              <!-- Self-Rescuer -->
+              <div class="ppe-check-item ppe-check-item--pending" id="ppe-status-self-rescuer">
+                <div class="ppe-check-item__icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="6" y="4" width="12" height="16" rx="2"/><line x1="10" y1="8" x2="14" y2="8"/><circle cx="12" cy="14" r="2"/>
+                  </svg>
+                </div>
+                <div class="ppe-check-item__name">Self-Rescuer</div>
+                <div class="ppe-check-item__points">10 pts</div>
+                <div class="ppe-check-item__confidence">--</div>
+                <div class="ppe-check-item__status-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dim"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+              </div>
+              <!-- Gas Detector -->
+              <div class="ppe-check-item ppe-check-item--pending" id="ppe-status-gas-detector">
+                <div class="ppe-check-item__icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="7" y="2" width="10" height="20" rx="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="6" x2="14" y2="6"/><line x1="10" y1="9" x2="14" y2="9"/>
+                  </svg>
+                </div>
+                <div class="ppe-check-item__name">Gas Detector</div>
+                <div class="ppe-check-item__points">10 pts</div>
+                <div class="ppe-check-item__confidence">--</div>
+                <div class="ppe-check-item__status-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-dim"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Camera feed -->
+        <div class="panel panel--sharp scanner-camera">
+          <div class="panel__header">
+            <div class="panel__title">
+              <span class="panel__title-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+              Camera Feed
+            </div>
+          </div>
+          <div class="panel__body panel__body--flush" style="position:relative">
+            <div class="camera-feed">
+              <video id="scanner-video" playsinline muted></video>
+              <canvas id="scanner-canvas"></canvas>
+
+              <!-- Scan frame corners -->
+              <div class="scan-frame">
+                <div class="sf-bl"></div>
+                <div class="sf-br"></div>
+              </div>
+
+              <!-- Scan sweep line -->
+              <div class="scan-line" id="scan-line"></div>
+
+              <!-- HUD -->
+              <div class="camera-hud">
+                <div class="camera-hud__item">
+                  <span class="camera-hud__dot camera-hud__dot--green" id="model-status-dot-scanner"></span>
+<script src="lib/tf.min.js"></script>
+<script src="lib/chart.umd.min.js"></script>
+                <div class="camera-hud__item">
+                  <span class="camera-hud__dot camera-hud__dot--amber"></span>
+                  <span id="hud-person">NO PERSON</span>
+                </div>
+                <div class="camera-hud__item">
+                  <span id="hud-fps">-- FPS</span>
+                </div>
+              </div>
+
+              <!-- Camera placeholder (before init) -->
+              <div class="camera-feed__placeholder" id="camera-placeholder">
+                <svg class="camera-feed__placeholder-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+                <div class="camera-feed__placeholder-text">Camera initializing...</div>
+              </div>
+
+              <!-- Model loading overlay -->
+              <div class="model-loading-overlay" id="model-loading-overlay" style="display:none">
+                <div class="model-loading-overlay__spinner"></div>
+                <div class="model-loading-overlay__text">LOADING DETECTION MODEL...</div>
+                <div class="model-loading-overlay__progress">
+                  <div class="model-loading-overlay__progress-bar" id="model-progress-bar"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scan result -->
+        <div class="panel panel--sharp scanner-results">
+          <div class="panel__header">
+            <div class="panel__title">
+              <span class="panel__title-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </span>
+              Scan Result
+            </div>
+          </div>
+          <div class="panel__body" id="scanner-result-content">
+            <div class="score-display">
+              <div class="score-display__value text-dim">--</div>
+              <div class="score-display__label">AWAITING SCAN</div>
+              <div class="score-display__bar">
+                <div class="score-display__bar-fill" style="width:0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======== WORKERS VIEW ======== -->
+    <section class="view" id="view-workers">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-4)">
+        <h1 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;letter-spacing:0.06em;text-transform:uppercase">
+          Worker Compliance Records
+        </h1>
+      </div>
+      <div class="workers-grid" id="workers-list">
+        <div class="empty-state"><div class="empty-state__text">Loading...</div></div>
+      </div>
+    </section>
+
+    <!-- ======== ALERTS LOG VIEW ======== -->
+    <section class="view" id="view-alerts">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-4)">
+        <h1 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:700;letter-spacing:0.06em;text-transform:uppercase">
+          Alert Log
+        </h1>
+      </div>
+      <div class="panel panel--sharp">
+        <div class="panel__body panel__body--flush">
+          <div class="alerts-log" id="alerts-log-list">
+            <div class="empty-state"><div class="empty-state__text">Loading...</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Toast notification container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Scripts - order matters: deps first, then modules, then app -->
+<script src="lib/tf.min.js"></script>
+<script src="lib/coco-ssd.min.js"></script>
+<script src="lib/chart.umd.min.js"></script>
+<script src="js/data-store.js"></script>
+<script src="js/compliance.js"></script>
+<script src="js/identification.js"></script>
+<script src="js/alerts.js"></script>
+<script src="js/cv-scanner.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,44 @@
+description: Ultralytics best model trained on /content/Construction-Site-Safety-30/data.yaml
+author: Ultralytics
+date: '2026-07-12T22:04:49.701600'
+version: 8.3.253
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: Excavator
+  1: Gloves
+  2: Hardhat
+  3: Ladder
+  4: Mask
+  5: NO-Hardhat
+  6: NO-Mask
+  7: NO-Safety Vest
+  8: Person
+  9: SUV
+  10: Safety Cone
+  11: Safety Vest
+  12: bus
+  13: dump truck
+  14: fire hydrant
+  15: machinery
+  16: mini-van
+  17: sedan
+  18: semi
+  19: trailer
+  20: truck and trailer
+  21: truck
+  22: van
+  23: vehicle
+  24: wheel loader
+args:
+  batch: 1
+  half: false
+  int8: false
+  nms: false
+channels: 3
