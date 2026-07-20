@@ -2,7 +2,7 @@
 
 PPE compliance monitoring for underground coal mine entry points. Camera at the gate, YOLOv8 in the browser, score on screen.
 
-Built by **Wisdom Riders** — this is Phase 1 (CV + Dashboard).
+Built by **Wisdom Riders**. This is Phase 1 (CV + Dashboard).
 
 ---
 
@@ -16,7 +16,7 @@ Everything runs client-side. No server needed. Data lives in IndexedDB. Works of
 
 - YOLOv8 inference running in-browser via TensorFlow.js
 - Offline-first PWA (service worker caches the app shell + model weights)
-- IndexedDB for all data — workers, scan logs, alerts
+- IndexedDB for all data: workers, scan logs, alerts
 - RFID-ready identification module (schema and interface are in place, just needs hardware)
 
 ### What's not here yet (Phase 2)
@@ -41,7 +41,7 @@ npx serve khaan-netra
 
 Open `http://localhost:8080` in Chrome or Edge. Allow camera access when it asks. The YOLOv8 model loads on first visit and gets cached by the service worker after that.
 
-> **Note:** `file://` won't work — the service worker needs HTTP.
+> **Note:** `file://` won't work. The service worker needs HTTP.
 
 ---
 
@@ -49,7 +49,7 @@ Open `http://localhost:8080` in Chrome or Edge. Allow camera access when it asks
 
 We trained a YOLOv8n model on a construction PPE dataset using `ultralytics`, then exported it to TFJS format. The model sits in `models/ppe-detector/` and `cv-scanner.js` loads it with `tf.loadGraphModel()`.
 
-Detection classes include Helmet, Vest, Person, and the "missing" variants (NO-Hardhat, NO-Safety Vest). The model runs at whatever frame rate TF.js can manage on the client hardware — usually 10-20 FPS on a decent laptop.
+Detection classes include Helmet, Vest, Person, and the "missing" variants (NO-Hardhat, NO-Safety Vest). The model runs at whatever frame rate TF.js can manage on the client hardware, usually 10-20 FPS on a decent laptop.
 
 ### Training (if you want to retrain)
 
@@ -83,9 +83,9 @@ Other datasets worth trying:
 | Gas Detector | 10 | No |
 | **Total** | **100** | |
 
-- Below 30% → **ENTRY DENIED** (red state, instant alert, supervisor notified)
-- 30% and above → entry allowed, logged normally
-- 30–49% gets a warning alert (borderline)
+- Below 30%: **ENTRY DENIED** (red state, instant alert, supervisor notified)
+- 30% and above: entry allowed, logged normally
+- 30 to 49% gets a warning alert (borderline)
 
 ---
 
@@ -137,7 +137,7 @@ IdentificationSource.getWorker() → Promise<{
 
 ### Hooking up a reader
 
-**USB-HID readers** (keyboard-wedge type): There's already a `BurstDetector` in the manual entry field that watches for fast keystroke bursts (<50ms apart). Most HID readers just "type" the UID and hit Enter. The burst detector catches that and auto-submits. Plug in the reader and it should just work — no code changes.
+**USB-HID readers** (keyboard-wedge type): There's already a `BurstDetector` in the manual entry field that watches for fast keystroke bursts (<50ms apart). Most HID readers just "type" the UID and hit Enter. The burst detector catches that and auto-submits. Plug in the reader and it should just work, no code changes.
 
 **Serial/Bluetooth readers**: Use `navigator.serial` or `navigator.bluetooth` to read the UID, then resolve the Promise with `{workerId, name, source: 'rfid'}`. Add a new class in `identification.js` and update `createSource()` to pick it.
 
@@ -151,7 +151,7 @@ No migration needed when RFID goes live.
 
 ### PPE tag scanning
 
-Separate from worker ID — each PPE item could have its own RFID tag. This'd be a new module (`js/rfid-scanner.js`) that scans each item, verifies UIDs server-side, and feeds results into the compliance scoring alongside the CV detections.
+Separate from worker ID. Each PPE item could have its own RFID tag. This'd be a new module (`js/rfid-scanner.js`) that scans each item, verifies UIDs server-side, and feeds results into the compliance scoring alongside the CV detections.
 
 ---
 
@@ -167,9 +167,9 @@ Dashboard has CSV and JSON export buttons. Covers:
 ## Testing offline
 
 1. Load the app fully in Chrome (let the model download)
-2. DevTools → Application → Service Workers — check it's registered
-3. Network tab → tick "Offline"
-4. Reload. Dashboard, scanner, inference — all should work
+2. DevTools, then Application, then Service Workers. Check it's registered
+3. Network tab, tick "Offline"
+4. Reload. Dashboard, scanner, inference, all should work
 5. Or just turn off WiFi
 
 ---
